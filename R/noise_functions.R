@@ -1,5 +1,4 @@
 
-
 noise_uniform <- function(data) {
   return(sum(data) * log(1/nrow(data)))
 }

@@ -25,7 +25,6 @@ negloglik_mod1<-function(w,data, alpha, noise_model = c("none")){
   b<-diag(2)
   c<-matrix(c(w[3],w[4]),2,1)
   
-  
   if (noise_model[1] == "uniform") {
     L_noise <- noise_uniform(data)
   } else if (noise_model[1] == "differential") {
