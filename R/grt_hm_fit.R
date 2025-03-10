@@ -90,9 +90,9 @@
 grt_hm_fit <- function(
     cmat, rand_pert=0.3, n_reps=10, control=list(),
     noise_models = list(
-      c("none"), c("uniform"), c("differential", 2),
-      alpha = 0
-    )
+      c("none"), c("uniform"), c("differential", 2)
+    ),
+    alpha = 0
   ) {
   results_list <- list()
   for (noise_model in noise_models) {
@@ -125,14 +125,6 @@ fit_grt_models <- function(cmat, rand_pert=0, n_reps=1, control=control, noise_m
     control$ndeps <- 1e-1
   }
   
-  create_objective <- function(fn) {
-    if (noise_model[1] == "none") {
-      return(function(par) fn(par, cmat, alpha = alpha, noise_model = noise_model))
-    } else {
-      return(function(par) fn(par, cmat, alpha = alpha, noise_model = noise_model))    
-    }
-  }
-  
   # fit model 1
   start_params <- c(1, 1, -.5, -.5)
   ctrl <- control
@@ -142,9 +134,13 @@ fit_grt_models <- function(cmat, rand_pert=0, n_reps=1, control=control, noise_m
   min_nll <- Inf
   for(i in 1:n_reps) {
     init_par <- rand_start(start_params, low_params, high_params, rand_pert)
-    candidate <- optim(par=init_par, fn=create_objective(negloglik_mod1), data=cmat, 
-                       method="L-BFGS-B", lower=low_params, upper=high_params, 
-                       control=ctrl)
+    candidate <- optim(
+      par=init_par,
+      fn=function(par) negloglik_mod1(par, data = cmat, alpha = alpha, noise_model = noise_model),
+      data=cmat, 
+      method="L-BFGS-B", lower=low_params, upper=high_params, 
+      control=ctrl
+    )
     if(candidate$value < min_nll) {
       mle_model1 <- candidate
       min_nll <- candidate$value
@@ -160,9 +156,13 @@ fit_grt_models <- function(cmat, rand_pert=0, n_reps=1, control=control, noise_m
   min_nll <- Inf
   for(i in 1:n_reps){
     init_par <- rand_start(start_params,low_params,high_params,rand_pert)
-    candidate <- optim(par=init_par, fn=create_objective(negloglik_mod2), data=cmat, 
-                       method="L-BFGS-B", lower=low_params, upper=high_params, 
-                       control=ctrl)
+    candidate <- optim(
+      par=init_par,
+      fn=function(par) negloglik_mod2(par, data = cmat, alpha = alpha, noise_model = noise_model),
+      data=cmat, 
+      method="L-BFGS-B", lower=low_params, upper=high_params, 
+      control=ctrl
+    )
     if(candidate$value < min_nll) {
       mle_model2 <- candidate
       min_nll <- candidate$value
@@ -178,9 +178,13 @@ fit_grt_models <- function(cmat, rand_pert=0, n_reps=1, control=control, noise_m
   min_nll <- Inf
   for(i in 1:n_reps){
     init_par <- rand_start(start_params,low_params,high_params,rand_pert)
-    candidate <- optim(par=init_par, fn=create_objective(negloglik_mod3), data=cmat, 
-                       method="L-BFGS-B", lower=low_params, upper=high_params, 
-                       control=ctrl)
+    candidate <- optim(
+      par=init_par,
+      fn=function(par) negloglik_mod3(par, data = cmat, alpha = alpha, noise_model = noise_model),
+      data=cmat, 
+      method="L-BFGS-B", lower=low_params, upper=high_params, 
+      control=ctrl
+    )
     if(candidate$value < min_nll) {
       mle_model3 <- candidate
       min_nll <- candidate$value
@@ -196,9 +200,13 @@ fit_grt_models <- function(cmat, rand_pert=0, n_reps=1, control=control, noise_m
   min_nll <- Inf
   for(i in 1:n_reps){
     init_par <- rand_start(start_params,low_params,high_params,rand_pert)
-    candidate <- optim(par=init_par, fn=create_objective(negloglik_mod4), data=cmat, 
-                       method="L-BFGS-B", lower=low_params, upper=high_params, 
-                       control=ctrl)
+    candidate <- optim(
+      par=init_par,
+      fn=function(par) negloglik_mod4(par, data = cmat, alpha = alpha, noise_model = noise_model),
+      data=cmat, 
+      method="L-BFGS-B", lower=low_params, upper=high_params, 
+      control=ctrl
+    )
     if(candidate$value < min_nll) {
       mle_model4 <- candidate
       min_nll <- candidate$value
@@ -214,9 +222,13 @@ fit_grt_models <- function(cmat, rand_pert=0, n_reps=1, control=control, noise_m
   min_nll <- Inf
   for(i in 1:n_reps){
     init_par <- rand_start(start_params,low_params,high_params,rand_pert)
-    candidate <- optim(par=init_par, fn=create_objective(negloglik_mod5), data=cmat, 
-                       method="L-BFGS-B", lower=low_params, upper=high_params, 
-                       control=ctrl)
+    candidate <- optim(
+      par=init_par,
+      fn=function(par) negloglik_mod5(par, data = cmat, alpha = alpha, noise_model = noise_model),
+      data=cmat, 
+      method="L-BFGS-B", lower=low_params, upper=high_params, 
+      control=ctrl
+    )
     if(candidate$value < min_nll) {
       mle_model5 <- candidate
       min_nll <- candidate$value
@@ -232,9 +244,13 @@ fit_grt_models <- function(cmat, rand_pert=0, n_reps=1, control=control, noise_m
   min_nll <- Inf
   for(i in 1:n_reps){
     init_par <- rand_start(start_params,low_params,high_params,rand_pert)
-    candidate <- optim(par=init_par, fn=create_objective(negloglik_mod6), data=cmat, 
-                       method="L-BFGS-B", lower=low_params, upper=high_params, 
-                       control=ctrl)
+    candidate <- optim(
+      par=init_par,
+      fn=function(par) negloglik_mod6(par, data = cmat, alpha = alpha, noise_model = noise_model),
+      data=cmat, 
+      method="L-BFGS-B", lower=low_params, upper=high_params, 
+      control=ctrl
+    )
     if(candidate$value < min_nll) {
       mle_model6 <- candidate
       min_nll <- candidate$value
@@ -250,9 +266,13 @@ fit_grt_models <- function(cmat, rand_pert=0, n_reps=1, control=control, noise_m
   min_nll <- Inf
   for(i in 1:n_reps){
     init_par <- rand_start(start_params,low_params,high_params,rand_pert)
-    candidate <- optim(par=init_par, fn=create_objective(negloglik_mod7), data=cmat, 
-                       method="L-BFGS-B", lower=low_params, upper=high_params, 
-                       control=ctrl)
+    candidate <- optim(
+      par=init_par,
+      fn=function(par) negloglik_mod7(par, data = cmat, alpha = alpha, noise_model = noise_model),
+      data=cmat, 
+      method="L-BFGS-B", lower=low_params, upper=high_params, 
+      control=ctrl
+    )
     if(candidate$value < min_nll) {
       mle_model7 <- candidate
       min_nll <- candidate$value
@@ -268,9 +288,13 @@ fit_grt_models <- function(cmat, rand_pert=0, n_reps=1, control=control, noise_m
   min_nll <- Inf
   for(i in 1:n_reps){
     init_par <- rand_start(start_params,low_params,high_params,rand_pert)
-    candidate <- optim(par=init_par, fn=create_objective(negloglik_mod8), data=cmat, 
-                       method="L-BFGS-B", lower=low_params, upper=high_params, 
-                       control=ctrl)
+    candidate <- optim(
+      par=init_par,
+      fn=function(par) negloglik_mod8(par, data = cmat, alpha = alpha, noise_model = noise_model),
+      data=cmat, 
+      method="L-BFGS-B", lower=low_params, upper=high_params, 
+      control=ctrl
+    )
     if(candidate$value < min_nll) {
       mle_model8 <- candidate
       min_nll <- candidate$value
@@ -286,9 +310,13 @@ fit_grt_models <- function(cmat, rand_pert=0, n_reps=1, control=control, noise_m
   min_nll <- Inf
   for(i in 1:n_reps){
     init_par <- rand_start(start_params,low_params,high_params,rand_pert)
-    candidate <- optim(par=init_par, fn=create_objective(negloglik_mod9), data=cmat, 
-                       method="L-BFGS-B", lower=low_params, upper=high_params, 
-                       control=ctrl)
+    candidate <- optim(
+      par=init_par,
+      fn=function(par) negloglik_mod9(par, data = cmat, alpha = alpha, noise_model = noise_model),
+      data=cmat, 
+      method="L-BFGS-B", lower=low_params, upper=high_params, 
+      control=ctrl
+    )
     if(candidate$value < min_nll) {
       mle_model9 <- candidate
       min_nll <- candidate$value
@@ -304,9 +332,13 @@ fit_grt_models <- function(cmat, rand_pert=0, n_reps=1, control=control, noise_m
   min_nll <- Inf
   for(i in 1:n_reps){
     init_par <- rand_start(start_params,low_params,high_params,rand_pert)
-    candidate <- optim(par=init_par, fn=create_objective(negloglik_mod10), data=cmat, 
-                       method="L-BFGS-B", lower=low_params, upper=high_params, 
-                       control=ctrl)
+    candidate <- optim(
+      par=init_par,
+      fn=function(par) negloglik_mod10(par, data = cmat, alpha = alpha, noise_model = noise_model),
+      data=cmat, 
+      method="L-BFGS-B", lower=low_params, upper=high_params, 
+      control=ctrl
+    )
     if(candidate$value < min_nll) {
       mle_model10 <- candidate
       min_nll <- candidate$value
@@ -322,9 +354,13 @@ fit_grt_models <- function(cmat, rand_pert=0, n_reps=1, control=control, noise_m
   min_nll <- Inf
   for(i in 1:n_reps){
     init_par <- rand_start(start_params,low_params,high_params,rand_pert)
-    candidate <- optim(par=init_par, fn=create_objective(negloglik_mod11), data=cmat, 
-                       method="L-BFGS-B", lower=low_params, upper=high_params, 
-                       control=ctrl)
+    candidate <- optim(
+      par=init_par,
+      fn=function(par) negloglik_mod11(par, data = cmat, alpha = alpha, noise_model = noise_model),
+      data=cmat, 
+      method="L-BFGS-B", lower=low_params, upper=high_params, 
+      control=ctrl
+    )
     if(candidate$value < min_nll) {
       mle_model11 <- candidate
       min_nll <- candidate$value
@@ -340,9 +376,13 @@ fit_grt_models <- function(cmat, rand_pert=0, n_reps=1, control=control, noise_m
   min_nll <- Inf
   for(i in 1:n_reps){
     init_par <- rand_start(start_params,low_params,high_params,rand_pert)
-    candidate <- optim(par=init_par, fn=create_objective(negloglik_mod12), data=cmat, 
-                       method="L-BFGS-B", lower=low_params, upper=high_params, 
-                       control=ctrl)
+    candidate <- optim(
+      par=init_par,
+      fn=function(par) negloglik_mod12(par, data = cmat, alpha = alpha, noise_model = noise_model),
+      data=cmat, 
+      method="L-BFGS-B", lower=low_params, upper=high_params, 
+      control=ctrl
+    )
     if(candidate$value < min_nll) {
       mle_model12 <- candidate
       min_nll <- candidate$value

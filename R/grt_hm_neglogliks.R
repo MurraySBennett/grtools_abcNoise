@@ -41,7 +41,7 @@ negloglik_mod1<-function(w,data, alpha, noise_model = c("none")){
 }
 
 #### logL_PI_PS_A_DS #### 
-negloglik_mod2<-function(w,data, alpha, noise_model = c("none")){ 
+negloglik_mod2<-function(w, data, alpha, noise_model = c("none")){ 
   
   # get means
   means<-matrix(0,4,2,byrow=TRUE)
