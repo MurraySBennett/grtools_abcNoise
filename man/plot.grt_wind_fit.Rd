@@ -4,8 +4,7 @@
 \alias{plot.grt_wind_fit}
 \title{Plot a \code{grt_wind_fit} object}
 \usage{
-\method{plot}{grt_wind_fit}(model, labels = c("dim A", "dim B"),
-  ellipse_width = 0.8)
+\method{plot}{grt_wind_fit}(model, labels = c("dim A", "dim B"), ellipse_width = 0.8)
 }
 \arguments{
 \item{model}{A \code{grt_wind_fit} object}
@@ -17,4 +16,3 @@
 \description{
 Plot the object returned by \code{\link{grt_wind_fit}}
 }
-

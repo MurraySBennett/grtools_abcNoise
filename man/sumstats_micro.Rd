@@ -85,4 +85,3 @@ guide (2nd ed.)}. Mahwah, NJ: Erlbaum.
 \seealso{
 \code{\link{sumstats_macro}}
 }
-

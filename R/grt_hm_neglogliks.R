@@ -2,10 +2,10 @@
 # otherwise it wouldn't be general (it would work with only one data table)
 
 #### logL_PI_PS_DS ####
-negloglik_mod1<-function(w,data){ 
+negloglik_mod1<-function(w,data, alpha, noise_model = c("none")){ 
   # w is just a vector with 4 values: two means (w(1) and w(2) below) and the position
   # of two decision bounds (w(3) and w(4))
-    
+  
   # get means
   means<-matrix(0,4,2,byrow=TRUE)
   means[2,1]<-w[1]
@@ -25,12 +25,23 @@ negloglik_mod1<-function(w,data){
   b<-diag(2)
   c<-matrix(c(w[3],w[4]),2,1)
   
-  L<-matrixloglikC(data,means,covmat,b,c)
+  
+  if (noise_model[1] == "uniform") {
+    L_noise <- noise_uniform(data)
+  } else if (noise_model[1] == "differential") {
+    L_noise <- noise_differential(data, as.numeric(noise_model[2]))
+  } else {
+    L_noise <- 0
+  }
+  
+  L_grt <- matrixloglikC(data, means, covmat, b, c)
+  L <- (1 - alpha) * L_grt + alpha * L_noise
+  
   return(-L)
 }
 
 #### logL_PI_PS_A_DS #### 
-negloglik_mod2<-function(w,data){ 
+negloglik_mod2<-function(w,data, alpha, noise_model = c("none")){ 
   
   # get means
   means<-matrix(0,4,2,byrow=TRUE)
@@ -52,12 +63,22 @@ negloglik_mod2<-function(w,data){
   b<-diag(2)
   c<-matrix(c(w[5],w[6]),2,1)
   
-  L<-matrixloglikC(data,means,covmat,b,c)
+  if (noise_model[1] == "uniform") {
+    L_noise <- noise_uniform(data)
+  } else if (noise_model[1] == "differential") {
+    L_noise <- noise_differential(data, as.numeric(noise_model[2]))
+  } else {
+    L_noise <- 0
+  }
+  
+  L_grt <- matrixloglikC(data, means, covmat, b, c)
+  L <- (1 - alpha) * L_grt + alpha * L_noise
+  
   return(-L)
 }
 
 #### logL_PI_PS_B_DS #### 
-negloglik_mod3<-function(w,data){
+negloglik_mod3<-function(w,data, alpha, noise_model = c("none")){
   
   # get means
   means<-matrix(0,4,2,byrow=TRUE)
@@ -78,12 +99,22 @@ negloglik_mod3<-function(w,data){
   b<-diag(2)
   c<-matrix(c(w[5],w[6]),2,1)
   
-  L<-matrixloglikC(data,means,covmat,b,c)
+  if (noise_model[1] == "uniform") {
+    L_noise <- noise_uniform(data)
+  } else if (noise_model[1] == "differential") {
+    L_noise <- noise_differential(data, as.numeric(noise_model[2]))
+  } else {
+    L_noise <- 0
+  }
+  
+  L_grt <- matrixloglikC(data, means, covmat, b, c)
+  L <- (1 - alpha) * L_grt + alpha * L_noise
+  
   return(-L)
 }
 
 #### logL_1RHO_PS_DS #### 
-negloglik_mod4<-function(w,data){
+negloglik_mod4<-function(w,data, alpha, noise_model=c("none")){
   
   # get means
   
@@ -106,12 +137,22 @@ negloglik_mod4<-function(w,data){
   b<-diag(2)
   c<-matrix(c(w[4],w[5]),2,1)
   
-  L<-matrixloglikC(data,means,covmat,b,c)
+  if (noise_model[1] == "uniform") {
+    L_noise <- noise_uniform(data)
+  } else if (noise_model[1] == "differential") {
+    L_noise <- noise_differential(data, as.numeric(noise_model[2]))
+  } else {
+    L_noise <- 0
+  }
+  
+  L_grt <- matrixloglikC(data, means, covmat, b, c)
+  L <- (1 - alpha) * L_grt + alpha * L_noise
+  
   return(-L)
 }
 
 #### logL_PS_A_1RHO_DS #### 
-negloglik_mod5<-function(w,data){
+negloglik_mod5<-function(w,data, alpha, noise_model=c("none")){
   
   # get means
   means<-matrix(0,4,2,byrow=TRUE)
@@ -133,12 +174,22 @@ negloglik_mod5<-function(w,data){
   b<-diag(2)
   c<-matrix(c(w[6],w[7]),2,1)
   
-  L<-matrixloglikC(data,means,covmat,b,c)
+  if (noise_model[1] == "uniform") {
+    L_noise <- noise_uniform(data)
+  } else if (noise_model[1] == "differential") {
+    L_noise <- noise_differential(data, as.numeric(noise_model[2]))
+  } else {
+    L_noise <- 0
+  }
+  
+  L_grt <- matrixloglikC(data, means, covmat, b, c)
+  L <- (1 - alpha) * L_grt + alpha * L_noise
+  
   return(-L)
 }
 
 #### logL_PI_DS #### 
-negloglik_mod6<-function(w,data){
+negloglik_mod6<-function(w,data, alpha, noise_model=c("none")){
   
   # get means
   
@@ -162,13 +213,23 @@ negloglik_mod6<-function(w,data){
   b<-diag(2)
   c<-matrix(c(w[7],w[8]),2,1)
   
-  L<-matrixloglikC(data,means,covmat,b,c)
+  if (noise_model[1] == "uniform") {
+    L_noise <- noise_uniform(data)
+  } else if (noise_model[1] == "differential") {
+    L_noise <- noise_differential(data, as.numeric(noise_model[2]))
+  } else {
+    L_noise <- 0
+  }
+  
+  L_grt <- matrixloglikC(data, means, covmat, b, c)
+  L <- (1 - alpha) * L_grt + alpha * L_noise
+  
   return(-L)
 }
 
 
 #### logL_PS_B_1RHO_DS ####
-negloglik_mod7<-function(w,data){
+negloglik_mod7<-function(w,data, alpha, noise_model=c("none")){
   
   
   # get means
@@ -192,12 +253,22 @@ negloglik_mod7<-function(w,data){
   b<-diag(2)
   c<-matrix(c(w[6],w[7]),2,1)
   
-  L<-matrixloglikC(data,means,covmat,b,c)
+  if (noise_model[1] == "uniform") {
+    L_noise <- noise_uniform(data)
+  } else if (noise_model[1] == "differential") {
+    L_noise <- noise_differential(data, as.numeric(noise_model[2]))
+  } else {
+    L_noise <- 0
+  }
+  
+  L_grt <- matrixloglikC(data, means, covmat, b, c)
+  L <- (1 - alpha) * L_grt + alpha * L_noise
+  
   return(-L)
 }
 
 #### logL_PS_DS ####
-negloglik_mod8<-function(w,data){
+negloglik_mod8<-function(w,data, alpha, noise_model=c("none")){
   
   # get means
   means<-matrix(0,4,2,byrow=TRUE)
@@ -218,13 +289,23 @@ negloglik_mod8<-function(w,data){
   b<-diag(2)
   c<-matrix(c(w[7],w[8]),2,1)
   
-  L<-matrixloglikC(data,means,covmat,b,c)
+  if (noise_model[1] == "uniform") {
+    L_noise <- noise_uniform(data)
+  } else if (noise_model[1] == "differential") {
+    L_noise <- noise_differential(data, as.numeric(noise_model[2]))
+  } else {
+    L_noise <- 0
+  }
+  
+  L_grt <- matrixloglikC(data, means, covmat, b, c)
+  L <- (1 - alpha) * L_grt + alpha * L_noise
+  
   return(-L)
 }
 
 
 #### logL_PS_A_DS ####
-negloglik_mod9<-function(w,data){
+negloglik_mod9<-function(w,data, alpha, noise_model=c("none")){
   
   # get means
   
@@ -247,12 +328,22 @@ negloglik_mod9<-function(w,data){
   b<-diag(2)
   c<-matrix(c(w[9],w[10]),2,1)
   
-  L<-matrixloglikC(data,means,covmat,b,c)
+  if (noise_model[1] == "uniform") {
+    L_noise <- noise_uniform(data)
+  } else if (noise_model[1] == "differential") {
+    L_noise <- noise_differential(data, as.numeric(noise_model[2]))
+  } else {
+    L_noise <- 0
+  }
+  
+  L_grt <- matrixloglikC(data, means, covmat, b, c)
+  L <- (1 - alpha) * L_grt + alpha * L_noise
+  
   return(-L)
 }
 
 #### logL_1RHO_DS ####
-negloglik_mod10<-function(w,data){
+negloglik_mod10<-function(w,data, alpha, noise_model=c("none")){
   
   # get means
   
@@ -276,12 +367,22 @@ negloglik_mod10<-function(w,data){
   b<-diag(2)
   c<-matrix(c(w[8],w[9]),2,1)
   
-  L<-matrixloglikC(data,means,covmat,b,c)
+  if (noise_model[1] == "uniform") {
+    L_noise <- noise_uniform(data)
+  } else if (noise_model[1] == "differential") {
+    L_noise <- noise_differential(data, as.numeric(noise_model[2]))
+  } else {
+    L_noise <- 0
+  }
+  
+  L_grt <- matrixloglikC(data, means, covmat, b, c)
+  L <- (1 - alpha) * L_grt + alpha * L_noise
+  
   return(-L)
 }
 
 #### logL_PS_B_DS #### 
-negloglik_mod11<-function(w,data){
+negloglik_mod11<-function(w,data, alpha, noise_model=c("none")){
   
   # get means
   means<-matrix(0,4,2,byrow=TRUE)
@@ -303,13 +404,23 @@ negloglik_mod11<-function(w,data){
   b<-diag(2)
   c<-matrix(c(w[9],w[10]),2,1)
   
-  L<-matrixloglikC(data,means,covmat,b,c)
+  if (noise_model[1] == "uniform") {
+    L_noise <- noise_uniform(data)
+  } else if (noise_model[1] == "differential") {
+    L_noise <- noise_differential(data, as.numeric(noise_model[2]))
+  } else {
+    L_noise <- 0
+  }
+  
+  L_grt <- matrixloglikC(data, means, covmat, b, c)
+  L <- (1 - alpha) * L_grt + alpha * L_noise
+  
   return(-L)
 }
 
 
 #### logL_DS #### 
-negloglik_mod12<-function(w,data){
+negloglik_mod12<-function(w,data, alpha, noise_model=c("none")){
   
   # get means
   means<-matrix(0,4,2,byrow=TRUE)
@@ -332,6 +443,16 @@ negloglik_mod12<-function(w,data){
   b<-diag(2)
   c<-matrix(c(w[11],w[12]),2,1)
   
-  L<-matrixloglikC(data,means,covmat,b,c)
+  if (noise_model[1] == "uniform") {
+    L_noise <- noise_uniform(data)
+  } else if (noise_model[1] == "differential") {
+    L_noise <- noise_differential(data, as.numeric(noise_model[2]))
+  } else {
+    L_noise <- 0
+  }
+  
+  L_grt <- matrixloglikC(data, means, covmat, b, c)
+  L <- (1 - alpha) * L_grt + alpha * L_noise
+  
   return(-L)
 }

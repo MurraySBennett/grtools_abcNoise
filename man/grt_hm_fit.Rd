@@ -4,7 +4,13 @@
 \alias{grt_hm_fit}
 \title{Fit a hierarchy of traditional GRT models to identification data}
 \usage{
-grt_hm_fit(cmat, rand_pert = 0.3, n_reps = 10, control = list())
+grt_hm_fit(
+  cmat,
+  rand_pert = 0.3,
+  n_reps = 10,
+  control = list(),
+  noise_models = list(c("none"), c("uniform"), c("differential", 2), alpha = 0)
+)
 }
 \arguments{
 \item{cmat}{A 4x4 confusion matrix (see Details).}
@@ -24,6 +30,13 @@ defaults to ten.}
 here should be a single number instead of the vector that is usually passed 
 to \code{optim}. This single value is repeated inside \code{grt_hm_fit} to 
 create the appropriate vectors.}
+
+\item{noise_models}{A list of noise model specifications. Each element of the list should be a character vector. 
+The first element specifies the noise model type ("none", "uniform", or "differential"). 
+If "differential" is chosen, the second element should specify the noise ratio. Defaults to \code{list(c("none"), c("uniform"), c("differential", 2))}.}
+
+\item{alpha}{A numeric value between 0 and 1 representing the influence of the noise model on the overall likelihood. 
+0 indicates no influence of the noise model (GRT model only), and 1 indicates noise model only. Defaults to 0.}
 }
 \value{
 An object of class "\code{grt_hm_fit}."
@@ -94,4 +107,3 @@ Ashby, F. G., & Soto, F. A. (2015). Multidimensional signal
   Eidels (Eds.), \emph{Oxford handbook of computational and mathematical
   psychology} (pp. 13-34). Oxford University Press: New York, NY.
 }
-

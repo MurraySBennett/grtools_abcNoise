@@ -10,4 +10,3 @@ hessfix(par, fixed, fn, ..., method.args = list())
 specify an argument 'fixed', a vector of numerical values.
 created just as in function optifix
 }
-

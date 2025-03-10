@@ -24,7 +24,7 @@ plot.grt_hm_fit <- function(
       grepl("PI", model$model)
     )
     fig_title <- ""
-    if (any(held_ssumptions)){
+    if (any(held_assumptions)){
       assumptions <- c(
         paste0("PS(", labels[1], ")"),
         paste0("PS(", labels[2], ")"),

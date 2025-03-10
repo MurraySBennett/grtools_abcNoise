@@ -57,4 +57,3 @@ Soto, F. A., Musgrave, R., Vucovich, L., & Ashby, F. G. (2015).
   examining perceptual and decisional interactions with an application to
   face perception. \emph{Psychonomic Bulletin & Review, 22}(1), 88-111.
 }
-

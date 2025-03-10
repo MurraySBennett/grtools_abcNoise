@@ -4,9 +4,18 @@
 \alias{optifix}
 \title{optifix. Optimise with fixed parameters}
 \usage{
-optifix(par, fixed, fn, gr = NULL, ..., method = c("Nelder-Mead", "BFGS",
-  "CG", "L-BFGS-B", "SANN"), lower = -Inf, upper = Inf, control = list(),
-  hessian = FALSE)
+optifix(
+  par,
+  fixed,
+  fn,
+  gr = NULL,
+  ...,
+  method = c("Nelder-Mead", "BFGS", "CG", "L-BFGS-B", "SANN"),
+  lower = -Inf,
+  upper = Inf,
+  control = list(),
+  hessian = FALSE
+)
 }
 \description{
 its like optim, but with fixed parameters.
@@ -32,4 +41,3 @@ under a CC By-SA license: http://creativecommons.org/licenses/by-sa/3.0/
 Any use of this script must retain the text: 
 "Originally written by Barry Rowlingson" in comments.
 }
-

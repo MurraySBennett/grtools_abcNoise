@@ -4,8 +4,13 @@
 \alias{grt_wind_fit}
 \title{Fit a GRT-wIND model to identification data}
 \usage{
-grt_wind_fit(cmats, start_params = c(), model = "full",
-  rand_pert = 0.3, control = list())
+grt_wind_fit(
+  cmats,
+  start_params = c(),
+  model = "full",
+  rand_pert = 0.3,
+  control = list()
+)
 }
 \arguments{
 \item{cmats}{List of confusion matrices. Each entry in the list should contain

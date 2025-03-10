@@ -16,4 +16,4 @@ Imports:
 Suggests:
     MASS
 LinkingTo: Rcpp
-RoxygenNote: 5.0.1
+RoxygenNote: 7.3.2

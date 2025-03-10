@@ -19,7 +19,12 @@
 #'   here should be a single number instead of the vector that is usually passed 
 #'   to \code{optim}. This single value is repeated inside \code{grt_hm_fit} to 
 #'   create the appropriate vectors.
-#'   
+#' @param noise_models A list of noise model specifications. Each element of the list should be a character vector. 
+#'   The first element specifies the noise model type ("none", "uniform", or "differential"). 
+#'   If "differential" is chosen, the second element should specify the noise ratio. Defaults to \code{list(c("none"), c("uniform"), c("differential", 2))}.
+#' @param alpha A numeric value between 0 and 1 representing the influence of the noise model on the overall likelihood. 
+#'   0 indicates no influence of the noise model (GRT model only), and 1 indicates noise model only. Defaults to 0.
+#'
 #' @return An object of class "\code{grt_hm_fit}."
 #'   
 #'   The function \code{summary} is used to obtain a summary of results from the
@@ -82,208 +87,51 @@
 #' 
 #' @export
 #' 
-grt_hm_fit <- function(cmat, rand_pert=0.3, n_reps=10, control=list()){
+grt_hm_fit <- function(
+    cmat, rand_pert=0.3, n_reps=10, control=list(),
+    noise_models = list(
+      c("none"), c("uniform"), c("differential", 2),
+      alpha = 0
+    )
+  ) {
+  results_list <- list()
+  for (noise_model in noise_models) {
+    fitted_models <- fit_grt_models(cmat, rand_pert = rand_pert, n_reps = n_reps, control = control, noise_model = noise_model, alpha = alpha) 
+    if (noise_model[1] == "none"){
+      results_list[[paste0("GRT-only")]] <- list(
+        table = order_aic(fitted_models),
+        best_model = extract_best_model(fitted_models, order_aic(fitted_models))
+      )
+    } else {
+      results_list[[paste0("GRT-", paste(noise_model, collapse = "-"))]] <- list(
+        table = order_aic(fitted_models),
+        best_model = extract_best_model(fitted_models, order_aic(fitted_models))
+      )
+    }
+  }
   
-  # fit all models 
-  fitted_models <- fit_grt_models(cmat, rand_pert=rand_pert, n_reps=n_reps, control=control)
-  
-  # order all models according to AIC
-  o_aic <- order_aic(fitted_models)
-  
-  # put together a list with best-model parameters for output
-  best_model <- list()
-  best_model$means <- matrix(0, 4, 2, byrow=TRUE)
-  best_model$covmat <- list()
-  best_model$a1 <- 0
-  best_model$a2 <- 0
-  best_model$model <- ""
-  
-  o_match <- o_aic[1,]$model
-  best_model$model <- paste("GRT-", o_match, sep="")
-  model_list <- c("{PI, PS, DS}", "{PI, PS(A), DS}", "{PI, PS(B), DS}", 
-                  "{1_RHO, PS, DS}", "{1_RHO, PS(A), DS}", "{PI, DS}", 
-                  "{1_RHO, PS(B), DS}", "{PS, DS}", "{PS(A), DS}", 
-                  "{1_RHO, DS}", "{PS(B), DS}", "{DS}")
-  model_num <- pmatch(o_match, model_list)
-  w <- fitted_models[[model_num]]$par
-  best_model$model <- paste("GRT-", o_match, sep="")
-  switch(model_num,
-         mod1={best_model$means[2,1] <- w[1]
-               best_model$means[3,2] <- w[2]
-               best_model$means[4,1] <- w[1]
-               best_model$means[4,2] <- w[2]
-               best_model$covmat[[1]] <- diag(2)
-               best_model$covmat[[2]] <- diag(2)
-               best_model$covmat[[3]] <- diag(2)
-               best_model$covmat[[4]] <- diag(2)
-               best_model$a1 <- w[3]
-               best_model$a2 <- w[4]},
-         
-         mod2={best_model$means[2,1] <- w[1]
-               best_model$means[2,2] <- w[2]
-               best_model$means[3,2] <- w[3]
-               best_model$means[4,1] <- w[1]
-               best_model$means[4,2] <- w[4]
-               best_model$covmat[[1]] <- diag(2)
-               best_model$covmat[[2]] <- diag(2)
-               best_model$covmat[[3]] <- diag(2)
-               best_model$covmat[[4]] <- diag(2)
-               best_model$a1 <- w[5]
-               best_model$a2 <- w[6]},
-         
-         mod3={best_model$means[2,1] <- w[1]
-               best_model$means[3,1] <- w[2]
-               best_model$means[3,2] <- w[3]
-               best_model$means[4,1] <- w[4]
-               best_model$means[4,2] <- w[3]
-               best_model$covmat[[1]] <- diag(2)
-               best_model$covmat[[2]] <- diag(2)
-               best_model$covmat[[3]] <- diag(2)
-               best_model$covmat[[4]] <- diag(2)
-               best_model$a1 <- w[5]
-               best_model$a2 <- w[6]},
-         
-         mod4={best_model$means[2,1] <- w[1]
-               best_model$means[3,2] <- w[2]
-               best_model$means[4,1] <- w[1]
-               best_model$means[4,2] <- w[2]
-               vals <- c(1,w[3],w[3],1)
-               best_model$covmat[[1]] <- matrix(vals, 2, 2, byrow=TRUE)
-               best_model$covmat[[2]] <- matrix(vals, 2, 2, byrow=TRUE)
-               best_model$covmat[[3]] <- matrix(vals, 2, 2, byrow=TRUE)
-               best_model$covmat[[4]] <- matrix(vals, 2, 2, byrow=TRUE)
-               best_model$a1 <- w[4]
-               best_model$a2 <- w[5]},
-         
-         
-         mod5={best_model$means[2,1] <- w[1]
-               best_model$means[2,2] <- w[2]
-               best_model$means[3,2] <- w[3]
-               best_model$means[4,1] <- w[1]
-               best_model$means[4,2] <- w[4]
-               vals <- c(1,w[5],w[5],1)
-               best_model$covmat[[1]] <- matrix(vals, 2, 2, byrow=TRUE)
-               best_model$covmat[[2]] <- matrix(vals, 2, 2, byrow=TRUE)
-               best_model$covmat[[3]] <- matrix(vals, 2, 2, byrow=TRUE)
-               best_model$covmat[[4]] <- matrix(vals, 2, 2, byrow=TRUE)
-               best_model$a1 <- w[6]
-               best_model$a2 <- w[7]},
-         
-         mod6={best_model$means[2,1] <- w[1]
-               best_model$means[2,2] <- w[2]
-               best_model$means[3,1] <- w[3]
-               best_model$means[3,2] <- w[4]
-               best_model$means[4,1] <- w[5]
-               best_model$means[4,2] <- w[6]
-               best_model$covmat[[1]] <- diag(2)
-               best_model$covmat[[2]] <- diag(2)
-               best_model$covmat[[3]] <- diag(2)
-               best_model$covmat[[4]] <- diag(2)
-               best_model$a1 <- w[7]
-               best_model$a2 <- w[8]},
-         
-         mod7={best_model$means[2,1] <- w[1]
-               best_model$means[3,1] <- w[2]
-               best_model$means[3,2] <- w[3]
-               best_model$means[4,1] <- w[4]
-               best_model$means[4,2] <- w[3]
-               vals <- c(1,w[5],w[5],1)
-               best_model$covmat[[1]] <- matrix(vals, 2, 2, byrow=TRUE)
-               best_model$covmat[[2]] <- matrix(vals, 2, 2, byrow=TRUE)
-               best_model$covmat[[3]] <- matrix(vals, 2, 2, byrow=TRUE)
-               best_model$covmat[[4]] <- matrix(vals, 2, 2, byrow=TRUE)
-               best_model$a1 <- w[6]
-               best_model$a2 <- w[7]},
-         
-         mod8={best_model$means[2,1] <- w[1]
-               best_model$means[3,2] <- w[2]
-               best_model$means[4,1] <- w[1]
-               best_model$means[4,2] <- w[2]
-               best_model$covmat[[1]] <- matrix(c(1, w[3], w[3], 1), 2, 2, byrow=TRUE)
-               best_model$covmat[[2]] <- matrix(c(1, w[4], w[4], 1), 2, 2, byrow=TRUE)
-               best_model$covmat[[3]] <- matrix(c(1, w[5], w[5], 1), 2, 2, byrow=TRUE)
-               best_model$covmat[[4]] <- matrix(c(1, w[6], w[6], 1), 2, 2, byrow=TRUE)
-               best_model$a1 <- w[7]
-               best_model$a2 <- w[8]},
-         
-         mod9={best_model$means[2,1] <- w[1]
-               best_model$means[2,2] <- w[2]
-               best_model$means[3,2] <- w[3]
-               best_model$means[4,1] <- w[1]
-               best_model$means[4,2] <- w[4]
-               best_model$covmat[[1]] <- matrix(c(1, w[5], w[5], 1), 2, 2, byrow=TRUE)
-               best_model$covmat[[2]] <- matrix(c(1, w[6], w[6], 1), 2, 2, byrow=TRUE)
-               best_model$covmat[[3]] <- matrix(c(1, w[7], w[7], 1), 2, 2, byrow=TRUE)
-               best_model$covmat[[4]] <- matrix(c(1, w[8], w[8], 1), 2, 2, byrow=TRUE)
-               best_model$a1 <- w[9]
-               best_model$a2 <- w[10]},
-         
-         mod10={best_model$means[2,1] <- w[1]
-                best_model$means[2,2] <- w[2]
-                best_model$means[3,1] <- w[3]
-                best_model$means[3,2] <- w[4]
-                best_model$means[4,1] <- w[5]
-                best_model$means[4,2] <- w[6]
-                vals <- c(1,w[7],w[7],1)
-                best_model$covmat[[1]] <- matrix(vals, 2, 2, byrow=TRUE)
-                best_model$covmat[[2]] <- matrix(vals, 2, 2, byrow=TRUE)
-                best_model$covmat[[3]] <- matrix(vals, 2, 2, byrow=TRUE)
-                best_model$covmat[[4]] <- matrix(vals, 2, 2, byrow=TRUE)
-                best_model$a1 <- w[8]
-                best_model$a2 <- w[9]},
-         
-         mod11={best_model$means[2,1] <- w[1]
-                best_model$means[3,1] <- w[2]
-                best_model$means[3,2] <- w[3]
-                best_model$means[4,1] <- w[4]
-                best_model$means[4,2] <- w[3]
-                best_model$covmat[[1]] <- matrix(c(1, w[5], w[5], 1), 2, 2, byrow=TRUE)
-                best_model$covmat[[2]] <- matrix(c(1, w[6], w[6], 1), 2, 2, byrow=TRUE)
-                best_model$covmat[[3]] <- matrix(c(1, w[7], w[7], 1), 2, 2, byrow=TRUE)
-                best_model$covmat[[4]] <- matrix(c(1, w[8], w[8], 1), 2, 2, byrow=TRUE)
-                best_model$a1 <- w[9]
-                best_model$a2 <- w[10]},
-         
-         mod12={best_model$means[2,1] <- w[1]
-                best_model$means[2,2] <- w[2]
-                best_model$means[3,1] <- w[3]
-                best_model$means[3,2] <- w[4]
-                best_model$means[4,1] <- w[5]
-                best_model$means[4,2] <- w[6]
-                best_model$covmat[[1]] <- matrix(c(1, w[7], w[7], 1), 2, 2, byrow=TRUE)
-                best_model$covmat[[2]] <- matrix(c(1, w[8], w[8], 1), 2, 2, byrow=TRUE)
-                best_model$covmat[[3]] <- matrix(c(1, w[9], w[9], 1), 2, 2, byrow=TRUE)
-                best_model$covmat[[4]] <- matrix(c(1, w[10], w[10], 1), 2, 2, byrow=TRUE)
-                best_model$a1 <- w[11]
-                best_model$a2 <- w[12]})
-  
-  # save convergence info for best-fitting model
-  best_model$convergence <- fitted_models[[model_num]]$convergence
-  best_model$message <- fitted_models[[model_num]]$message
-  
-  # get observed and predicted values
-  best_model$predicted <- as.vector(matrix_predict(
-    best_model$means, best_model$covmat, diag(2), 
-    matrix(c(best_model$a1, best_model$a2), 2, 1)) )
-  best_model$observed <- as.vector(pmatrix(cmat))
-  
-  # return object of class grt_hm_fit
-  results <- list(table=o_aic, best_model=best_model)
-  class(results) <- "grt_hm_fit"
-  return (results)
+  class(results_list) <- "grt_hm_fit"
+  return(results_list)
 }
 
 ########################################################
 # Function that actually performs maximum-likelihood estimation
 # for all models:
 
-fit_grt_models <- function(cmat, rand_pert=0, n_reps=1, control=control){     
+fit_grt_models <- function(cmat, rand_pert=0, n_reps=1, control=control, noise_model = "none", alpha=0){
   
   # if ndeps was not selected by the user, assign a default value
   if (is.null(control[["ndeps"]])) {
     control$ndeps <- 1e-1
   }
   
+  create_objective <- function(fn) {
+    if (noise_model[1] == "none") {
+      return(function(par) fn(par, cmat, alpha = alpha, noise_model = noise_model))
+    } else {
+      return(function(par) fn(par, cmat, alpha = alpha, noise_model = noise_model))    
+    }
+  }
   
   # fit model 1
   start_params <- c(1, 1, -.5, -.5)
@@ -294,7 +142,7 @@ fit_grt_models <- function(cmat, rand_pert=0, n_reps=1, control=control){
   min_nll <- Inf
   for(i in 1:n_reps) {
     init_par <- rand_start(start_params, low_params, high_params, rand_pert)
-    candidate <- optim(par=init_par, fn=negloglik_mod1, data=cmat, 
+    candidate <- optim(par=init_par, fn=create_objective(negloglik_mod1), data=cmat, 
                        method="L-BFGS-B", lower=low_params, upper=high_params, 
                        control=ctrl)
     if(candidate$value < min_nll) {
@@ -312,7 +160,7 @@ fit_grt_models <- function(cmat, rand_pert=0, n_reps=1, control=control){
   min_nll <- Inf
   for(i in 1:n_reps){
     init_par <- rand_start(start_params,low_params,high_params,rand_pert)
-    candidate <- optim(par=init_par, fn=negloglik_mod2, data=cmat, 
+    candidate <- optim(par=init_par, fn=create_objective(negloglik_mod2), data=cmat, 
                        method="L-BFGS-B", lower=low_params, upper=high_params, 
                        control=ctrl)
     if(candidate$value < min_nll) {
@@ -330,7 +178,7 @@ fit_grt_models <- function(cmat, rand_pert=0, n_reps=1, control=control){
   min_nll <- Inf
   for(i in 1:n_reps){
     init_par <- rand_start(start_params,low_params,high_params,rand_pert)
-    candidate <- optim(par=init_par, fn=negloglik_mod3, data=cmat, 
+    candidate <- optim(par=init_par, fn=create_objective(negloglik_mod3), data=cmat, 
                        method="L-BFGS-B", lower=low_params, upper=high_params, 
                        control=ctrl)
     if(candidate$value < min_nll) {
@@ -348,7 +196,7 @@ fit_grt_models <- function(cmat, rand_pert=0, n_reps=1, control=control){
   min_nll <- Inf
   for(i in 1:n_reps){
     init_par <- rand_start(start_params,low_params,high_params,rand_pert)
-    candidate <- optim(par=init_par, fn=negloglik_mod4, data=cmat, 
+    candidate <- optim(par=init_par, fn=create_objective(negloglik_mod4), data=cmat, 
                        method="L-BFGS-B", lower=low_params, upper=high_params, 
                        control=ctrl)
     if(candidate$value < min_nll) {
@@ -366,7 +214,7 @@ fit_grt_models <- function(cmat, rand_pert=0, n_reps=1, control=control){
   min_nll <- Inf
   for(i in 1:n_reps){
     init_par <- rand_start(start_params,low_params,high_params,rand_pert)
-    candidate <- optim(par=init_par, fn=negloglik_mod5, data=cmat, 
+    candidate <- optim(par=init_par, fn=create_objective(negloglik_mod5), data=cmat, 
                        method="L-BFGS-B", lower=low_params, upper=high_params, 
                        control=ctrl)
     if(candidate$value < min_nll) {
@@ -384,7 +232,7 @@ fit_grt_models <- function(cmat, rand_pert=0, n_reps=1, control=control){
   min_nll <- Inf
   for(i in 1:n_reps){
     init_par <- rand_start(start_params,low_params,high_params,rand_pert)
-    candidate <- optim(par=init_par, fn=negloglik_mod6, data=cmat, 
+    candidate <- optim(par=init_par, fn=create_objective(negloglik_mod6), data=cmat, 
                        method="L-BFGS-B", lower=low_params, upper=high_params, 
                        control=ctrl)
     if(candidate$value < min_nll) {
@@ -402,7 +250,7 @@ fit_grt_models <- function(cmat, rand_pert=0, n_reps=1, control=control){
   min_nll <- Inf
   for(i in 1:n_reps){
     init_par <- rand_start(start_params,low_params,high_params,rand_pert)
-    candidate <- optim(par=init_par, fn=negloglik_mod7, data=cmat, 
+    candidate <- optim(par=init_par, fn=create_objective(negloglik_mod7), data=cmat, 
                        method="L-BFGS-B", lower=low_params, upper=high_params, 
                        control=ctrl)
     if(candidate$value < min_nll) {
@@ -420,7 +268,7 @@ fit_grt_models <- function(cmat, rand_pert=0, n_reps=1, control=control){
   min_nll <- Inf
   for(i in 1:n_reps){
     init_par <- rand_start(start_params,low_params,high_params,rand_pert)
-    candidate <- optim(par=init_par, fn=negloglik_mod8, data=cmat, 
+    candidate <- optim(par=init_par, fn=create_objective(negloglik_mod8), data=cmat, 
                        method="L-BFGS-B", lower=low_params, upper=high_params, 
                        control=ctrl)
     if(candidate$value < min_nll) {
@@ -438,7 +286,7 @@ fit_grt_models <- function(cmat, rand_pert=0, n_reps=1, control=control){
   min_nll <- Inf
   for(i in 1:n_reps){
     init_par <- rand_start(start_params,low_params,high_params,rand_pert)
-    candidate <- optim(par=init_par, fn=negloglik_mod9, data=cmat, 
+    candidate <- optim(par=init_par, fn=create_objective(negloglik_mod9), data=cmat, 
                        method="L-BFGS-B", lower=low_params, upper=high_params, 
                        control=ctrl)
     if(candidate$value < min_nll) {
@@ -456,7 +304,7 @@ fit_grt_models <- function(cmat, rand_pert=0, n_reps=1, control=control){
   min_nll <- Inf
   for(i in 1:n_reps){
     init_par <- rand_start(start_params,low_params,high_params,rand_pert)
-    candidate <- optim(par=init_par, fn=negloglik_mod10, data=cmat, 
+    candidate <- optim(par=init_par, fn=create_objective(negloglik_mod10), data=cmat, 
                        method="L-BFGS-B", lower=low_params, upper=high_params, 
                        control=ctrl)
     if(candidate$value < min_nll) {
@@ -474,7 +322,7 @@ fit_grt_models <- function(cmat, rand_pert=0, n_reps=1, control=control){
   min_nll <- Inf
   for(i in 1:n_reps){
     init_par <- rand_start(start_params,low_params,high_params,rand_pert)
-    candidate <- optim(par=init_par, fn=negloglik_mod11, data=cmat, 
+    candidate <- optim(par=init_par, fn=create_objective(negloglik_mod11), data=cmat, 
                        method="L-BFGS-B", lower=low_params, upper=high_params, 
                        control=ctrl)
     if(candidate$value < min_nll) {
@@ -492,7 +340,7 @@ fit_grt_models <- function(cmat, rand_pert=0, n_reps=1, control=control){
   min_nll <- Inf
   for(i in 1:n_reps){
     init_par <- rand_start(start_params,low_params,high_params,rand_pert)
-    candidate <- optim(par=init_par, fn=negloglik_mod12, data=cmat, 
+    candidate <- optim(par=init_par, fn=create_objective(negloglik_mod12), data=cmat, 
                        method="L-BFGS-B", lower=low_params, upper=high_params, 
                        control=ctrl)
     if(candidate$value < min_nll) {
@@ -505,6 +353,12 @@ fit_grt_models <- function(cmat, rand_pert=0, n_reps=1, control=control){
                      mle_model6, mle_model7, mle_model8, mle_model9, mle_model10,
                      mle_model11, mle_model12)
   return(fitted_models)
+}
+
+
+extract_best_model <- function(fitted_models, ordered_aic) {
+  best_model_index <- which(sapply(fitted_models, function(model) identical(model$value, -ordered_aic$`log-likelihood`[1])))
+  return(fitted_models[[best_model_index]])
 }
 
 

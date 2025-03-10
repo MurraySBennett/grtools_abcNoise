@@ -4,8 +4,16 @@
 \alias{plot.grt_hm_fit}
 \title{Plot a \code{grt_hm_fit} object}
 \usage{
-\method{plot}{grt_hm_fit}(model, labels = c("dim A", "dim B"),
-  ellipse_width = 0.8)
+\method{plot}{grt_hm_fit}(
+  model,
+  labels = c("dim A", "dim B"),
+  marginals = TRUE,
+  scatter = TRUE,
+  show_assumptions = FALSE,
+  show_labels = TRUE,
+  subtitle = NA,
+  ellipse_width = 0.8
+)
 }
 \arguments{
 \item{model}{A \code{grt_hm_fit} object}
@@ -17,4 +25,3 @@
 \description{
 Plot the object returned by \code{\link{grt_hm_fit}}
 }
-

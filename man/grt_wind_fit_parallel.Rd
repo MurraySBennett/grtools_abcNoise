@@ -4,8 +4,15 @@
 \alias{grt_wind_fit_parallel}
 \title{Fit a GRT-wIND model to data several times in parallel}
 \usage{
-grt_wind_fit_parallel(cmats, start_params = c(), model = "full",
-  rand_pert = 0.3, control = list(), n_reps, n_cores = 0)
+grt_wind_fit_parallel(
+  cmats,
+  start_params = c(),
+  model = "full",
+  rand_pert = 0.3,
+  control = list(),
+  n_reps,
+  n_cores = 0
+)
 }
 \arguments{
 \item{cmats}{List of confusion matrices. Each entry in the list should contain
@@ -16,12 +23,14 @@ optimization algorithm. You can provide either the group parameters or both
 group and individual parameters. It will be created automatically if not
 provided (see Details).}
 
-\item{model}{A string indicating what GRT-wIND model to run. By default is the
-full model ("full"), but restricted models are also available. "PS(A)" and "PS(B)"
-are models that assume PS for dimension A and dimension B, respectively. "PI" is
-a model that assumes perceptual independence.  "DS(A)" and "DS(B)" are models
-that assume DS for dimension A ("PS(A)") and dimension B ("PS(B)"), respectively.
-"1-VAR" is a model that assumes that all variances are equal to one.}
+\item{model}{A string or vector of strings indicating what GRT-wIND model to run. 
+By default is the full model ("full"), but restricted models can be obtained by 
+combination of several string values. "PS(A)" and "PS(B)" are models that assume 
+PS for dimension A and dimension B, respectively. "PI" is a model that assumes 
+perceptual independence.  "DS(A)" and "DS(B)" are models that assume DS for dimension 
+A and dimension B, respectively. "1-VAR" is a model that assumes that all variances 
+are equal to one. A model assuming PS for dimension A and that all variances are 
+equal to one would require setting model=c("PS(A)", "1-VAR").}
 
 \item{rand_pert}{Maximum value of a random perturbation added to the starting
 parameters. With a value of zero, the algorithm is started exactly at
@@ -55,4 +64,3 @@ General recognition theory with individual differences: A new method for
 examining perceptual and decisional interactions with an application to
 face perception. \emph{Psychonomic Bulletin & Review, 22}(1), 88-111.
 }
-

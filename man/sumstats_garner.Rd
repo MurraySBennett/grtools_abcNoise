@@ -74,4 +74,3 @@ Ashby, F. G., & Maddox, W. T. (1994). A response time theory of
   separability and integrality in speeded classification. \emph{Journal of 
   Mathematical Psychology, 38}(4), 423-466.
 }
-
